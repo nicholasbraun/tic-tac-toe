@@ -20,6 +20,10 @@ type position struct {
 	col int
 }
 
+func (p *position) String() string {
+	return fmt.Sprintf("%d-%d", p.row, p.col)
+}
+
 type cursor struct {
 	row int
 	col int

@@ -152,31 +152,33 @@ func (g *Game) switchPlayer() {
 	}
 }
 
-func (g *Game) checkForWinningMove(symbol string) *position {
+func (g *Game) checkForWinningMoves(symbol string) []position {
+	wp := []position{}
+
 	for _, positions := range winningPositions {
 		if g.board.getPosition(positions[0]) == symbol &&
 			g.board.getPosition(positions[1]) == symbol &&
 			g.board.getPosition(positions[2]) == emptyField {
 
-			return &positions[2]
+			wp = append(wp, positions[2])
 		}
 
 		if g.board.getPosition(positions[0]) == symbol &&
 			g.board.getPosition(positions[1]) == emptyField &&
 			g.board.getPosition(positions[2]) == symbol {
 
-			return &positions[1]
+			wp = append(wp, positions[1])
 		}
 
 		if g.board.getPosition(positions[0]) == emptyField &&
 			g.board.getPosition(positions[1]) == symbol &&
 			g.board.getPosition(positions[2]) == symbol {
 
-			return &positions[0]
+			wp = append(wp, positions[0])
 		}
 	}
 
-	return nil
+	return wp
 }
 
 func (g *Game) checkForCorners() *position {
@@ -210,18 +212,96 @@ func (g *Game) handleMoveDone() (isFinished bool, winner *player) {
 	return
 }
 
+func (g *Game) getScore() int {
+	empty := " "
+	score := 0
+
+	for _, positions := range winningPositions {
+		if g.board.getPosition(positions[0]) == Symbols[Player1] &&
+			g.board.getPosition(positions[1]) == Symbols[Player1] &&
+			g.board.getPosition(positions[2]) == Symbols[Player1] {
+			score += 1000
+		}
+
+		if (g.board.getPosition(positions[0]) == empty &&
+			g.board.getPosition(positions[1]) == Symbols[Player1] &&
+			g.board.getPosition(positions[2]) == Symbols[Player1]) ||
+			(g.board.getPosition(positions[0]) == Symbols[Player1] &&
+				g.board.getPosition(positions[1]) == empty &&
+				g.board.getPosition(positions[2]) == Symbols[Player1]) ||
+			(g.board.getPosition(positions[0]) == Symbols[Player1] &&
+				g.board.getPosition(positions[1]) == Symbols[Player1] &&
+				g.board.getPosition(positions[2]) == empty) {
+			score += 50
+		}
+		if (g.board.getPosition(positions[0]) == empty &&
+			g.board.getPosition(positions[1]) == empty &&
+			g.board.getPosition(positions[2]) == Symbols[Player1]) ||
+			(g.board.getPosition(positions[0]) == Symbols[Player1] &&
+				g.board.getPosition(positions[1]) == empty &&
+				g.board.getPosition(positions[2]) == empty) ||
+			(g.board.getPosition(positions[0]) == empty &&
+				g.board.getPosition(positions[1]) == Symbols[Player1] &&
+				g.board.getPosition(positions[2]) == empty) {
+			score += 10
+		}
+
+		if g.board.getPosition(positions[0]) == Symbols[Player2] &&
+			g.board.getPosition(positions[1]) == Symbols[Player2] &&
+			g.board.getPosition(positions[2]) == Symbols[Player2] {
+			score -= 1000
+		}
+
+		if (g.board.getPosition(positions[0]) == empty &&
+			g.board.getPosition(positions[1]) == Symbols[Player2] &&
+			g.board.getPosition(positions[2]) == Symbols[Player2]) ||
+			(g.board.getPosition(positions[0]) == Symbols[Player2] &&
+				g.board.getPosition(positions[1]) == empty &&
+				g.board.getPosition(positions[2]) == Symbols[Player2]) ||
+			(g.board.getPosition(positions[0]) == Symbols[Player2] &&
+				g.board.getPosition(positions[1]) == Symbols[Player2] &&
+				g.board.getPosition(positions[2]) == empty) {
+			score -= 50
+		}
+
+		if (g.board.getPosition(positions[0]) == empty &&
+			g.board.getPosition(positions[1]) == empty &&
+			g.board.getPosition(positions[2]) == Symbols[Player2]) ||
+			(g.board.getPosition(positions[0]) == Symbols[Player2] &&
+				g.board.getPosition(positions[1]) == empty &&
+				g.board.getPosition(positions[2]) == empty) ||
+			(g.board.getPosition(positions[0]) == empty &&
+				g.board.getPosition(positions[1]) == Symbols[Player2] &&
+				g.board.getPosition(positions[2]) == empty) {
+			score -= 10
+		}
+	}
+
+	return score
+}
+
+// func (g *Game) calculateScores(player player) map[string]int {
+// 	currentSymbol := g.CurrentSymbol()
+// 	scores := map[string]int{}
+//
+// 	for _, p := range g.board.getEmptyPositions() {
+// 	}
+//
+// 	return scores
+// }
+
 func (g *Game) makeComputerMove() (finished bool, winner *player) {
 	currentSymbol := g.CurrentSymbol()
 
-	if p := g.checkForWinningMove(currentSymbol); p != nil {
-		g.board.MarkField(*p, currentSymbol)
-		goto afterMove
-	}
-
-	if p := g.checkForWinningMove(g.OpponentSymbol()); p != nil {
-		g.board.MarkField(*p, currentSymbol)
-		goto afterMove
-	}
+	// if p := g.checkForWinningMove(currentSymbol); p != nil {
+	// 	g.board.MarkField(*p, currentSymbol)
+	// 	goto afterMove
+	// }
+	//
+	// if p := g.checkForWinningMove(g.OpponentSymbol()); p != nil {
+	// 	g.board.MarkField(*p, currentSymbol)
+	// 	goto afterMove
+	// }
 
 	if g.board.getPosition(position{1, 1}) == emptyField {
 		g.board.MarkField(position{1, 1}, currentSymbol)

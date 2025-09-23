@@ -230,6 +230,109 @@ func TestComputer(t *testing.T) {
 		simulateGameRound(t, *g, 1)
 	})
 
+	t.Run("it creates a score for a given board", func(t *testing.T) {
+		g := NewGame()
+		g.humanOpponent = false
+
+		g.board = board{
+			{" ", " ", " "},
+			{" ", " ", " "},
+			{" ", " ", " "},
+		}
+		g.activePlayer = Player1
+
+		got := g.getScore()
+		want := 0
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+
+		g.board = board{
+			{" ", " ", " "},
+			{" ", "x", " "},
+			{" ", " ", " "},
+		}
+		g.activePlayer = Player1
+
+		got = g.getScore()
+		want = 40
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+
+		g.board = board{
+			{"x", " ", " "},
+			{" ", " ", " "},
+			{" ", " ", " "},
+		}
+		g.activePlayer = Player1
+
+		got = g.getScore()
+		want = 30
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+
+		g.board = board{
+			{" ", "x", " "},
+			{" ", " ", " "},
+			{" ", " ", " "},
+		}
+		g.activePlayer = Player1
+
+		got = g.getScore()
+		want = 20
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+
+		g.board = board{
+			{" ", "o", " "},
+			{" ", "x", " "},
+			{" ", " ", " "},
+		}
+		g.activePlayer = Player1
+
+		got = g.getScore()
+		want = 20
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+
+		g.board = board{
+			{" ", " ", "o"},
+			{" ", "x", " "},
+			{" ", " ", " "},
+		}
+		g.activePlayer = Player1
+
+		got = g.getScore()
+		want = 10
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+
+		g.board = board{
+			{"x", "x", "x"},
+			{"o", " ", " "},
+			{" ", "o", " "},
+		}
+		g.activePlayer = Player1
+
+		got = g.getScore()
+		want = 1010
+
+		if got != want {
+			t.Errorf("board should have a score of %d. got %d", want, got)
+		}
+	})
+
 	// t.Run("it finds the best opening move as player1", func(t *testing.T) {
 	// 	g := NewGame()
 	//
