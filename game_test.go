@@ -230,311 +230,41 @@ func TestComputer(t *testing.T) {
 		simulateGameRound(t, *g, 1)
 	})
 
-	t.Run("it creates a score for a given board", func(t *testing.T) {
+	t.Run("it calculates scores of possible next positions", func(t *testing.T) {
 		g := NewGame()
 		g.humanOpponent = false
 
 		g.board = board{
-			{" ", " ", " "},
-			{" ", " ", " "},
-			{" ", " ", " "},
-		}
-		g.activePlayer = Player1
-
-		got := g.getScore()
-		want := 0
-
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
-		}
-
-		g.board = board{
-			{" ", " ", " "},
-			{" ", "x", " "},
-			{" ", " ", " "},
-		}
-		g.activePlayer = Player1
-
-		got = g.getScore()
-		want = 40
-
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
-		}
-
-		g.board = board{
+			{"x", "x", "o"},
+			{"o", "o", " "},
 			{"x", " ", " "},
-			{" ", " ", " "},
-			{" ", " ", " "},
 		}
 		g.activePlayer = Player1
 
-		got = g.getScore()
-		want = 30
+		got := g.calculateScores()
+		fmt.Println(got)
 
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
+		want12 := 0
+		got12 := got["1-2"]
+
+		if got12 != want12 {
+			t.Errorf("position 1-2 should have a score of %d. got %d", want12, got12)
 		}
 
-		g.board = board{
-			{" ", "x", " "},
-			{" ", " ", " "},
-			{" ", " ", " "},
-		}
-		g.activePlayer = Player1
+		want21 := -10000
+		got21 := got["2-1"]
 
-		got = g.getScore()
-		want = 20
-
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
+		if got21 != want21 {
+			t.Errorf("position 2-1 should have a score of %d. got %d", want21, got21)
 		}
 
-		g.board = board{
-			{" ", "o", " "},
-			{" ", "x", " "},
-			{" ", " ", " "},
-		}
-		g.activePlayer = Player1
+		want22 := -10000
+		got22 := got["2-2"]
 
-		got = g.getScore()
-		want = 20
-
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
-		}
-
-		g.board = board{
-			{" ", " ", "o"},
-			{" ", "x", " "},
-			{" ", " ", " "},
-		}
-		g.activePlayer = Player1
-
-		got = g.getScore()
-		want = 10
-
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
-		}
-
-		g.board = board{
-			{"x", "x", "x"},
-			{"o", " ", " "},
-			{" ", "o", " "},
-		}
-		g.activePlayer = Player1
-
-		got = g.getScore()
-		want = 1010
-
-		if got != want {
-			t.Errorf("board should have a score of %d. got %d", want, got)
+		if got22 != want22 {
+			t.Errorf("position 2-2 should have a score of %d. got %d", want22, got22)
 		}
 	})
-
-	// t.Run("it finds the best opening move as player1", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard := "[ ][ ][ ]\n[ ][x][ ]\n[ ][ ][ ]\n"
-	// 	gotBoard := g.board.String(nil)
-	//
-	// 	if gotBoard != wantBoard {
-	// 		t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
-	// 	}
-	// })
-	//
-	// t.Run("it finds the best opening move as player2", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.MakeMove()
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard := "[x][ ][ ]\n[ ][o][ ]\n[ ][ ][ ]\n"
-	// 	gotBoard := g.board.String(nil)
-	//
-	// 	if gotBoard != wantBoard {
-	// 		t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
-	// 	}
-	// })
-	//
-	// t.Run("it finds the winning move", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.board = board{
-	// 		{"x", "x", " "},
-	// 		{"o", "o", " "},
-	// 		{" ", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard := board{
-	// 		{"x", "x", "x"},
-	// 		{"o", "o", " "},
-	// 		{" ", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	g.board = board{
-	// 		{"x", " ", " "},
-	// 		{" ", "x", " "},
-	// 		{"o", "o", " "},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard = board{
-	// 		{"x", " ", " "},
-	// 		{" ", "x", " "},
-	// 		{"o", "o", "x"},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	g.board = board{
-	// 		{"x", "o", " "},
-	// 		{" ", "o", " "},
-	// 		{"x", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard = board{
-	// 		{"x", "o", " "},
-	// 		{"x", "o", " "},
-	// 		{"x", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	g.board = board{
-	// 		{"x", "x", "o"},
-	// 		{"x", "o", " "},
-	// 		{" ", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player2
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard = board{
-	// 		{"x", "x", "o"},
-	// 		{"x", "o", " "},
-	// 		{"o", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	g.board = board{
-	// 		{"x", "x", "o"},
-	// 		{"x", "o", "o"},
-	// 		{" ", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard = board{
-	// 		{"x", "x", "o"},
-	// 		{"x", "o", "o"},
-	// 		{"x", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	// })
-	//
-	// t.Run("it blocks the opponents winning move", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.board = board{
-	// 		{"x", " ", " "},
-	// 		{"o", "o", " "},
-	// 		{" ", " ", "x"},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard := board{
-	// 		{"x", " ", " "},
-	// 		{"o", "o", "x"},
-	// 		{" ", " ", "x"},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	g.board = board{
-	// 		{"o", " ", "x"},
-	// 		{" ", "x", " "},
-	// 		{"o", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard = board{
-	// 		{"o", " ", "x"},
-	// 		{"x", "x", " "},
-	// 		{"o", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	// })
-
-	// t.Run("it uses a corner when all corners are empty", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.board = board{
-	// 		{" ", " ", " "},
-	// 		{" ", "x", " "},
-	// 		{" ", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player2
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard := board{
-	// 		{"o", " ", " "},
-	// 		{" ", "x", " "},
-	// 		{" ", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	// })
-
-	// t.Run("it finds a fork move", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.board = board{
-	// 		{"o", " ", " "},
-	// 		{"x", "x", "o"},
-	// 		{" ", " ", " "},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard := board{
-	// 		{"o", " ", "x"},
-	// 		{"x", "x", "o"},
-	// 		{" ", " ", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	g.board = board{
-	// 		{"x", " ", " "},
-	// 		{" ", "o", " "},
-	// 		{" ", " ", "x"},
-	// 	}
-	// 	g.activePlayer = Player1
-	// 	g.MakeComputerMove()
-	//
-	// 	wantBoard = board{
-	// 		{"x", "o", " "},
-	// 		{" ", "o", " "},
-	// 		{" ", " ", "x"},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	// })
 }
 
 func assertBoard(t testing.TB, got, want board) {
@@ -566,8 +296,6 @@ func simulateGameRound(t testing.TB, game Game, round int) {
 		if isFinished && winner != nil && *winner == Player1 {
 			t.Fatalf("player 1 must not be able to win the game: \n%v", newGame.getStates())
 		}
-
-		fmt.Printf("round %d\n%v\n", round, newGame.board.String(nil))
 
 		if !newGame.board.isBoardFull() && newGame.stage != Finished {
 			simulateGameRound(t, *newGame, round+1)

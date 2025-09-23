@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
+	"strings"
 )
 
 type player int
@@ -152,33 +154,31 @@ func (g *Game) switchPlayer() {
 	}
 }
 
-func (g *Game) checkForWinningMoves(symbol string) []position {
-	wp := []position{}
-
+func (g *Game) checkForWinningMove(symbol string) *position {
 	for _, positions := range winningPositions {
 		if g.board.getPosition(positions[0]) == symbol &&
 			g.board.getPosition(positions[1]) == symbol &&
 			g.board.getPosition(positions[2]) == emptyField {
 
-			wp = append(wp, positions[2])
+			return &positions[2]
 		}
 
 		if g.board.getPosition(positions[0]) == symbol &&
 			g.board.getPosition(positions[1]) == emptyField &&
 			g.board.getPosition(positions[2]) == symbol {
 
-			wp = append(wp, positions[1])
+			return &positions[1]
 		}
 
 		if g.board.getPosition(positions[0]) == emptyField &&
 			g.board.getPosition(positions[1]) == symbol &&
 			g.board.getPosition(positions[2]) == symbol {
 
-			wp = append(wp, positions[0])
+			return &positions[0]
 		}
 	}
 
-	return wp
+	return nil
 }
 
 func (g *Game) checkForCorners() *position {
@@ -212,114 +212,107 @@ func (g *Game) handleMoveDone() (isFinished bool, winner *player) {
 	return
 }
 
-func (g *Game) getScore() int {
-	empty := " "
-	score := 0
+func (g *Game) calculateScores() map[string]int {
+	scores := map[string]int{}
+	empties := g.board.getEmptyPositions()
 
-	for _, positions := range winningPositions {
-		if g.board.getPosition(positions[0]) == Symbols[Player1] &&
-			g.board.getPosition(positions[1]) == Symbols[Player1] &&
-			g.board.getPosition(positions[2]) == Symbols[Player1] {
-			score += 1000
+	maxVal := func(m map[string]int) int {
+		v := math.MinInt
+		for _, s := range m {
+			if s > v {
+				v = s
+			}
 		}
-
-		if (g.board.getPosition(positions[0]) == empty &&
-			g.board.getPosition(positions[1]) == Symbols[Player1] &&
-			g.board.getPosition(positions[2]) == Symbols[Player1]) ||
-			(g.board.getPosition(positions[0]) == Symbols[Player1] &&
-				g.board.getPosition(positions[1]) == empty &&
-				g.board.getPosition(positions[2]) == Symbols[Player1]) ||
-			(g.board.getPosition(positions[0]) == Symbols[Player1] &&
-				g.board.getPosition(positions[1]) == Symbols[Player1] &&
-				g.board.getPosition(positions[2]) == empty) {
-			score += 50
+		return v
+	}
+	minVal := func(m map[string]int) int {
+		v := math.MaxInt
+		for _, s := range m {
+			if s < v {
+				v = s
+			}
 		}
-		if (g.board.getPosition(positions[0]) == empty &&
-			g.board.getPosition(positions[1]) == empty &&
-			g.board.getPosition(positions[2]) == Symbols[Player1]) ||
-			(g.board.getPosition(positions[0]) == Symbols[Player1] &&
-				g.board.getPosition(positions[1]) == empty &&
-				g.board.getPosition(positions[2]) == empty) ||
-			(g.board.getPosition(positions[0]) == empty &&
-				g.board.getPosition(positions[1]) == Symbols[Player1] &&
-				g.board.getPosition(positions[2]) == empty) {
-			score += 10
-		}
-
-		if g.board.getPosition(positions[0]) == Symbols[Player2] &&
-			g.board.getPosition(positions[1]) == Symbols[Player2] &&
-			g.board.getPosition(positions[2]) == Symbols[Player2] {
-			score -= 1000
-		}
-
-		if (g.board.getPosition(positions[0]) == empty &&
-			g.board.getPosition(positions[1]) == Symbols[Player2] &&
-			g.board.getPosition(positions[2]) == Symbols[Player2]) ||
-			(g.board.getPosition(positions[0]) == Symbols[Player2] &&
-				g.board.getPosition(positions[1]) == empty &&
-				g.board.getPosition(positions[2]) == Symbols[Player2]) ||
-			(g.board.getPosition(positions[0]) == Symbols[Player2] &&
-				g.board.getPosition(positions[1]) == Symbols[Player2] &&
-				g.board.getPosition(positions[2]) == empty) {
-			score -= 50
-		}
-
-		if (g.board.getPosition(positions[0]) == empty &&
-			g.board.getPosition(positions[1]) == empty &&
-			g.board.getPosition(positions[2]) == Symbols[Player2]) ||
-			(g.board.getPosition(positions[0]) == Symbols[Player2] &&
-				g.board.getPosition(positions[1]) == empty &&
-				g.board.getPosition(positions[2]) == empty) ||
-			(g.board.getPosition(positions[0]) == empty &&
-				g.board.getPosition(positions[1]) == Symbols[Player2] &&
-				g.board.getPosition(positions[2]) == empty) {
-			score -= 10
-		}
+		return v
 	}
 
-	return score
-}
+	for _, p := range empties {
+		ng := NewGame()
+		ng.board = g.board
+		ng.cursor = p
+		ng.activePlayer = g.activePlayer
 
-// func (g *Game) calculateScores(player player) map[string]int {
-// 	currentSymbol := g.CurrentSymbol()
-// 	scores := map[string]int{}
-//
-// 	for _, p := range g.board.getEmptyPositions() {
-// 	}
-//
-// 	return scores
-// }
+		finished, _ := ng.makeHumanMove() // switches player if not finished
+
+		s := 0
+
+		// terminal bonus/penalty
+		if finished {
+			if ng.winner == nil {
+				// draw => no adjustment
+			} else if *ng.winner == Player1 {
+				s += 10000
+			} else {
+				s -= 10000
+			}
+			scores[p.String()] = s
+			continue
+		}
+
+		child := ng.calculateScores()
+		if len(child) > 0 {
+			if ng.activePlayer == Player1 {
+				s += maxVal(child) // P1 will try to maximize
+			} else {
+				s += minVal(child) // P2 will try to minimize
+			}
+		}
+		scores[p.String()] = s
+	}
+	return scores
+}
 
 func (g *Game) makeComputerMove() (finished bool, winner *player) {
 	currentSymbol := g.CurrentSymbol()
 
-	// if p := g.checkForWinningMove(currentSymbol); p != nil {
-	// 	g.board.MarkField(*p, currentSymbol)
-	// 	goto afterMove
-	// }
-	//
-	// if p := g.checkForWinningMove(g.OpponentSymbol()); p != nil {
-	// 	g.board.MarkField(*p, currentSymbol)
-	// 	goto afterMove
-	// }
+	if p := g.checkForWinningMove(currentSymbol); p != nil {
+		g.board.MarkField(*p, currentSymbol)
+	} else if p := g.checkForWinningMove(g.OpponentSymbol()); p != nil {
+		g.board.MarkField(*p, currentSymbol)
+	} else {
+		scores := g.calculateScores()
 
-	if g.board.getPosition(position{1, 1}) == emptyField {
-		g.board.MarkField(position{1, 1}, currentSymbol)
-		goto afterMove
+		min := math.MaxInt
+		max := math.MinInt
+
+		maxPos := ""
+		minPos := ""
+		for posStr, score := range scores {
+			if score > max {
+				max = score
+				maxPos = posStr
+			}
+
+			if score < min {
+				min = score
+				minPos = posStr
+			}
+		}
+
+		if g.activePlayer == Player1 {
+			p, err := stringPosToPosition(maxPos)
+			if err != nil {
+				panic("could not get position from string")
+			}
+			g.board.MarkField(*p, Symbols[Player1])
+		} else {
+			p, err := stringPosToPosition(minPos)
+			if err != nil {
+				panic("could not get position from string")
+			}
+			g.board.MarkField(*p, Symbols[Player2])
+		}
 	}
 
-	if emptyCorner := g.checkForCorners(); emptyCorner != nil {
-		g.board.MarkField(*emptyCorner, currentSymbol)
-		goto afterMove
-	}
-
-	// TODO: find best move instead of first empty position
-	if emptyPositions := g.board.getEmptyPositions(); len(emptyPositions) > 0 {
-		g.board.MarkField(*emptyPositions[0], currentSymbol)
-		goto afterMove
-	}
-
-afterMove:
 	return g.handleMoveDone()
 }
 
@@ -346,4 +339,16 @@ func (g Game) simulateGames(p player) []*position {
 	}
 
 	return positions
+}
+
+func stringPosToPosition(posStr string) (*position, error) {
+	spitString := strings.Split(posStr, "-")
+
+	row, err := strconv.Atoi(spitString[0])
+	col, err := strconv.Atoi(spitString[1])
+	if err != nil {
+		return nil, err
+	}
+
+	return &position{row, col}, nil
 }
