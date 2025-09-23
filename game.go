@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"strconv"
-	"strings"
 )
 
 type player int
@@ -81,7 +80,7 @@ func (g *Game) OpponentSymbol() string {
 func NewGame() *Game {
 	return &Game{
 		activePlayer: Player1,
-		board:        NewBoard(),
+		board:        newBoard(),
 		stage:        Setup,
 		cursor:       &position{0, 0},
 	}
@@ -113,9 +112,9 @@ func (g *Game) MoveCursorUp() {
 
 func (g *Game) isGameFinished() (isFinished bool, winner *player) {
 	for _, positions := range winningPositions {
-		if g.board.GetSymbolFromPosition(positions[0]) == Symbols[g.activePlayer] &&
-			g.board.GetSymbolFromPosition(positions[1]) == Symbols[g.activePlayer] &&
-			g.board.GetSymbolFromPosition(positions[2]) == Symbols[g.activePlayer] {
+		if g.board.getSymbolFromPosition(positions[0]) == Symbols[g.activePlayer] &&
+			g.board.getSymbolFromPosition(positions[1]) == Symbols[g.activePlayer] &&
+			g.board.getSymbolFromPosition(positions[2]) == Symbols[g.activePlayer] {
 			return true, &g.activePlayer
 		}
 	}
@@ -128,7 +127,7 @@ func (g *Game) isGameFinished() (isFinished bool, winner *player) {
 }
 
 func (g *Game) makeHumanMove() (finished bool, winner *player) {
-	g.board.MarkField(*g.cursor, g.CurrentSymbol())
+	g.board.markField(*g.cursor, g.CurrentSymbol())
 
 	return g.handleMoveDone()
 }
@@ -176,21 +175,6 @@ func (g *Game) checkForWinningMove(symbol string) *position {
 
 			return &positions[0]
 		}
-	}
-
-	return nil
-}
-
-func (g *Game) checkForCorners() *position {
-	corners := [4]position{
-		{0, 0}, {0, 2}, {2, 0}, {2, 2},
-	}
-
-	if g.board.getPosition(corners[0]) == emptyField &&
-		g.board.getPosition(corners[1]) == emptyField &&
-		g.board.getPosition(corners[2]) == emptyField &&
-		g.board.getPosition(corners[3]) == emptyField {
-		return &corners[0]
 	}
 
 	return nil
@@ -275,9 +259,9 @@ func (g *Game) makeComputerMove() (finished bool, winner *player) {
 	currentSymbol := g.CurrentSymbol()
 
 	if p := g.checkForWinningMove(currentSymbol); p != nil {
-		g.board.MarkField(*p, currentSymbol)
+		g.board.markField(*p, currentSymbol)
 	} else if p := g.checkForWinningMove(g.OpponentSymbol()); p != nil {
-		g.board.MarkField(*p, currentSymbol)
+		g.board.markField(*p, currentSymbol)
 	} else {
 		scores := g.calculateScores()
 
@@ -303,52 +287,15 @@ func (g *Game) makeComputerMove() (finished bool, winner *player) {
 			if err != nil {
 				panic("could not get position from string")
 			}
-			g.board.MarkField(*p, Symbols[Player1])
+			g.board.markField(*p, Symbols[Player1])
 		} else {
 			p, err := stringPosToPosition(minPos)
 			if err != nil {
 				panic("could not get position from string")
 			}
-			g.board.MarkField(*p, Symbols[Player2])
+			g.board.markField(*p, Symbols[Player2])
 		}
 	}
 
 	return g.handleMoveDone()
-}
-
-func (g Game) simulateGames(p player) []*position {
-	positions := []*position{}
-
-	for _, emptyPosition := range g.board.getEmptyPositions() {
-		newGame := NewGame()
-		newGame.activePlayer = g.activePlayer
-		newGame.board = g.board
-		newGame.humanOpponent = g.humanOpponent
-		newGame.states = g.states
-		newGame.cursor = emptyPosition
-		newGame.MakeMove()
-
-		if newGame.stage == Finished && newGame.winner != nil && *newGame.winner != p {
-		}
-
-		// fmt.Printf("round %d\n%v\n", round, newGame.board.String(nil))
-
-		if !newGame.board.isBoardFull() && newGame.stage != Finished {
-			newGame.simulateGames(p)
-		}
-	}
-
-	return positions
-}
-
-func stringPosToPosition(posStr string) (*position, error) {
-	spitString := strings.Split(posStr, "-")
-
-	row, err := strconv.Atoi(spitString[0])
-	col, err := strconv.Atoi(spitString[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return &position{row, col}, nil
 }

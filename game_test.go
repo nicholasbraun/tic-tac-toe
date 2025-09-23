@@ -140,25 +140,6 @@ func TestGame(t *testing.T) {
 		}
 	})
 
-	// t.Run("it marks a field with the correct symbol and changes the active player when making a move", func(t *testing.T) {
-	// 	g := NewGame()
-	//
-	// 	g.cursor = &position{2, 1}
-	// 	g.MakeMove()
-	//
-	// 	wantBoard := board{
-	// 		{" ", " ", " "},
-	// 		{" ", " ", " "},
-	// 		{" ", "x", " "},
-	// 	}
-	//
-	// 	assertBoard(t, g.board, wantBoard)
-	//
-	// 	if g.activePlayer != Player2 {
-	// 		t.Errorf("did not update the player.want player1, got %q", g.activePlayer)
-	// 	}
-	// })
-
 	t.Run("it ends the game when it is a draw", func(t *testing.T) {
 		g := NewGame()
 

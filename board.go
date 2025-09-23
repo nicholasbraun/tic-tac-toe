@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -24,14 +26,25 @@ func (p *position) String() string {
 	return fmt.Sprintf("%d-%d", p.row, p.col)
 }
 
-type cursor struct {
-	row int
-	col int
+func stringPosToPosition(posStr string) (*position, error) {
+	spitString := strings.Split(posStr, "-")
+
+	row, err := strconv.Atoi(spitString[0])
+	if err != nil {
+		return nil, err
+	}
+
+	col, err := strconv.Atoi(spitString[1])
+	if err != nil {
+		return nil, err
+	}
+
+	return &position{row, col}, nil
 }
 
 type board [3][3]string
 
-func NewBoard() board {
+func newBoard() board {
 	return [3][3]string{
 		{" ", " ", " "},
 		{" ", " ", " "},
@@ -53,7 +66,7 @@ func (b *board) getEmptyPositions() []*position {
 	return emptyPositions
 }
 
-func (b *board) GetSymbolFromPosition(p position) string {
+func (b *board) getSymbolFromPosition(p position) string {
 	return b[p.row][p.col]
 }
 
@@ -98,7 +111,7 @@ func (b *board) String(c *position) string {
 	return res
 }
 
-func (b *board) MarkField(c position, symbol string) error {
+func (b *board) markField(c position, symbol string) error {
 	if b[c.row][c.col] != " " {
 		return fmt.Errorf("field is already taken")
 	}
