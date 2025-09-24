@@ -34,7 +34,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorRight()
 
 		wantBoard := "[ ][" + cursorOK + "][ ]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-		gotBoard := g.board.String(g.cursor)
+		gotBoard := g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -43,7 +43,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorRight()
 
 		wantBoard = "[ ][ ][" + cursorOK + "]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -52,7 +52,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorRight()
 
 		wantBoard = "[ ][ ][" + cursorOK + "]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -61,7 +61,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorDown()
 
 		wantBoard = "[ ][ ][ ]\n[ ][ ][" + cursorOK + "]\n[ ][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -70,7 +70,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorDown()
 
 		wantBoard = "[ ][ ][ ]\n[ ][ ][ ]\n[ ][ ][" + cursorOK + "]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -79,7 +79,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorDown()
 
 		wantBoard = "[ ][ ][ ]\n[ ][ ][ ]\n[ ][ ][" + cursorOK + "]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -88,7 +88,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorLeft()
 
 		wantBoard = "[ ][ ][ ]\n[ ][ ][ ]\n[ ][" + cursorOK + "][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -97,7 +97,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorLeft()
 
 		wantBoard = "[ ][ ][ ]\n[ ][ ][ ]\n[" + cursorOK + "][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -106,7 +106,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorLeft()
 
 		wantBoard = "[ ][ ][ ]\n[ ][ ][ ]\n[" + cursorOK + "][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -115,7 +115,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorUp()
 
 		wantBoard = "[ ][ ][ ]\n[" + cursorOK + "][ ][ ]\n[ ][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -124,7 +124,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorUp()
 
 		wantBoard = "[" + cursorOK + "][ ][ ]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -133,7 +133,7 @@ func TestGame(t *testing.T) {
 		g.MoveCursorUp()
 
 		wantBoard = "[" + cursorOK + "][ ][ ]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-		gotBoard = g.board.String(g.cursor)
+		gotBoard = g.board.String(&g.cursor)
 
 		if gotBoard != wantBoard {
 			t.Errorf("want board: %q, got: %q", wantBoard, gotBoard)
@@ -149,7 +149,7 @@ func TestGame(t *testing.T) {
 			{" ", "o", "o"},
 		}
 		g.activePlayer = Player1
-		g.cursor = &position{2, 0}
+		g.cursor = position{2, 0}
 		g.MakeMove()
 
 		wantBoard := board{
@@ -178,7 +178,7 @@ func TestGame(t *testing.T) {
 			{" ", " ", " "},
 		}
 		g.activePlayer = Player1
-		g.cursor = &position{0, 2}
+		g.cursor = position{0, 2}
 		g.MakeMove()
 
 		wantBoard := board{
@@ -206,14 +206,14 @@ func TestGame(t *testing.T) {
 func TestComputer(t *testing.T) {
 	t.Run("it runs a simulation of all possible moves against the computer and never wins", func(t *testing.T) {
 		g := NewGame()
-		g.humanOpponent = false
+		g.isOpponentHuman = false
 
 		simulateGameRound(t, *g, 1)
 	})
 
 	t.Run("it calculates scores of possible next positions", func(t *testing.T) {
 		g := NewGame()
-		g.humanOpponent = false
+		g.isOpponentHuman = false
 
 		g.board = board{
 			{"x", "x", "o"},
@@ -268,9 +268,9 @@ func simulateGameRound(t testing.TB, game Game, round int) {
 		newGame := NewGame()
 		newGame.activePlayer = game.activePlayer
 		newGame.board = game.board
-		newGame.humanOpponent = game.humanOpponent
+		newGame.isOpponentHuman = game.isOpponentHuman
 		newGame.states = game.states
-		newGame.cursor = emptyPosition
+		newGame.cursor = *emptyPosition
 
 		isFinished, winner := newGame.MakeMove()
 

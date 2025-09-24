@@ -125,10 +125,14 @@ func (m model) View() string {
 		s += m.game.GetBoard(false)
 
 		if m.game.GetWinner() != nil {
-			if *m.game.GetWinner() == tictactoe.Player1 {
-				s += "\nYou won! "
+			if m.game.IsOpponentHuman() {
+				s += "\nPlayer " + m.game.GetWinner().String() + " won! "
 			} else {
-				s += "\nYou lost! "
+				if *m.game.GetWinner() == tictactoe.Player1 {
+					s += "\nYou won! "
+				} else {
+					s += "\nYou lost! "
+				}
 			}
 		} else {
 			s += "\nIt's a draw.\n\n"

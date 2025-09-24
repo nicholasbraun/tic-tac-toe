@@ -22,27 +22,40 @@ var winningPositions = [8][3]position{
 	{position{0, 2}, position{1, 1}, position{2, 0}},
 }
 
-type Stage int
+type stage int
 
 const (
-	Setup    Stage = iota
-	Playing  Stage = iota
-	Finished Stage = iota
+	Setup    stage = iota
+	Playing  stage = iota
+	Finished stage = iota
 )
 
 type Game struct {
-	activePlayer  player
-	humanOpponent bool
-	board         board
-	stage         Stage
-	cursor        *position
-	winner        *player
-	states        []board
+	activePlayer    player
+	isOpponentHuman bool
+	board           board
+	stage           stage
+	cursor          position
+	winner          *player
+	states          []board
+}
+
+func NewGame() *Game {
+	return &Game{
+		activePlayer: Player1,
+		board:        newBoard(),
+		stage:        Setup,
+		cursor:       position{0, 0},
+	}
 }
 
 func (g *Game) Start(humanOpponent bool) {
 	g.stage = Playing
-	g.humanOpponent = humanOpponent
+	g.isOpponentHuman = humanOpponent
+}
+
+func (g *Game) IsOpponentHuman() bool {
+	return g.isOpponentHuman
 }
 
 func (g *Game) GetActiveSymbol() string {
@@ -57,7 +70,7 @@ func (g *Game) getInactiveSymbol() string {
 	return Symbols[Player1]
 }
 
-func (g *Game) GetStage() Stage {
+func (g *Game) GetStage() stage {
 	return g.stage
 }
 
@@ -67,19 +80,10 @@ func (g *Game) GetWinner() *player {
 
 func (g *Game) GetBoard(withCursor bool) string {
 	if withCursor {
-		return g.board.String(g.cursor)
+		return g.board.String(&g.cursor)
 	}
 
 	return g.board.String(nil)
-}
-
-func NewGame() *Game {
-	return &Game{
-		activePlayer: Player1,
-		board:        newBoard(),
-		stage:        Setup,
-		cursor:       &position{0, 0},
-	}
 }
 
 func (g *Game) MoveCursorRight() {
@@ -107,7 +111,7 @@ func (g *Game) MoveCursorUp() {
 }
 
 func (g *Game) MakeMove() (finished bool, winner *player) {
-	if g.humanOpponent {
+	if g.isOpponentHuman {
 		return g.makeHumanMove()
 	}
 
@@ -136,7 +140,7 @@ func (g *Game) isGameFinished() (isFinished bool, winner *player) {
 }
 
 func (g *Game) makeHumanMove() (finished bool, winner *player) {
-	g.board.markField(*g.cursor, g.GetActiveSymbol())
+	g.board.markField(g.cursor, g.GetActiveSymbol())
 
 	return g.handleMoveDone()
 }
@@ -218,7 +222,7 @@ func (g *Game) calculateScores() map[string]int {
 	for _, p := range empties {
 		ng := NewGame()
 		ng.board = g.board
-		ng.cursor = p
+		ng.cursor = *p
 		ng.activePlayer = g.activePlayer
 
 		finished, _ := ng.makeHumanMove()
