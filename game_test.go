@@ -19,7 +19,7 @@ func TestGame(t *testing.T) {
 			{" ", " ", " "},
 		}
 
-		assertBoard(t, g.board, wantBoard)
+		assertBoard(t, g.board, wantBoard, nil)
 
 		gotCursor := g.cursor
 
@@ -158,7 +158,7 @@ func TestGame(t *testing.T) {
 			{"x", "o", "o"},
 		}
 
-		assertBoard(t, g.board, wantBoard)
+		assertBoard(t, g.board, wantBoard, nil)
 
 		if g.stage != Finished {
 			t.Errorf("the game should be finished. got: %v", g.stage)
@@ -187,7 +187,7 @@ func TestGame(t *testing.T) {
 			{" ", " ", " "},
 		}
 
-		assertBoard(t, g.board, wantBoard)
+		assertBoard(t, g.board, wantBoard, nil)
 
 		if g.stage != Finished {
 			t.Errorf("game should be finished. got stage %d", g.stage)
@@ -246,17 +246,6 @@ func TestComputer(t *testing.T) {
 			t.Errorf("position 2-2 should have a score of %d. got %d", want22, got22)
 		}
 	})
-}
-
-func assertBoard(t testing.TB, got, want board) {
-	t.Helper()
-
-	gotStr := got.String(nil)
-	wantStr := want.String(nil)
-
-	if gotStr != wantStr {
-		t.Errorf("want board: %v, got: %v", wantStr, gotStr)
-	}
 }
 
 func simulateGameRound(t testing.TB, game Game, round int) {

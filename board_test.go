@@ -8,47 +8,47 @@ func TestBoard(t *testing.T) {
 	t.Run("set up an empty board", func(t *testing.T) {
 		b := newBoard()
 
-		got := b.String(nil)
-		want := "[ ][ ][ ]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
+		want := board{
+			{" ", " ", " "},
+			{" ", " ", " "},
+			{" ", " ", " "},
 		}
+		assertBoard(t, b, want, nil)
 	})
 
 	t.Run("show a green cursor on the board when the field is empty", func(t *testing.T) {
 		b := newBoard()
 
-		got := b.String(&position{1, 1})
-		want := "[ ][ ][ ]\n[ ][" + cursorOK + "][ ]\n[ ][ ][ ]\n"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
+		want := board{
+			{" ", " ", " "},
+			{" ", cursorOK, " "},
+			{" ", " ", " "},
 		}
+		assertBoard(t, b, want, &position{1, 1})
 	})
 
 	t.Run("show a red cursor on the board when the field is taken", func(t *testing.T) {
 		b := newBoard()
 		b.markField(position{1, 1}, "x")
 
-		got := b.String(&position{1, 1})
-		want := "[ ][ ][ ]\n[ ][" + cursorError + "][ ]\n[ ][ ][ ]\n"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
+		want := board{
+			{" ", " ", " "},
+			{" ", cursorError, " "},
+			{" ", " ", " "},
 		}
+		assertBoard(t, b, want, &position{1, 1})
 	})
 
 	t.Run("mark a field with x", func(t *testing.T) {
 		b := newBoard()
 		b.markField(position{0, 1}, "x")
 
-		got := b.String(nil)
-		want := "[ ][x][ ]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
+		want := board{
+			{" ", "x", " "},
+			{" ", " ", " "},
+			{" ", " ", " "},
 		}
+		assertBoard(t, b, want, nil)
 	})
 
 	t.Run("marking a used field returns an error", func(t *testing.T) {
@@ -64,11 +64,22 @@ func TestBoard(t *testing.T) {
 			t.Fatalf("expected an error when marking used field")
 		}
 
-		got := b.String(nil)
-		want := "[ ][x][ ]\n[ ][ ][ ]\n[ ][ ][ ]\n"
-
-		if got != want {
-			t.Errorf("got %q, want %q", got, want)
+		want := board{
+			{" ", "x", " "},
+			{" ", " ", " "},
+			{" ", " ", " "},
 		}
+		assertBoard(t, b, want, nil)
 	})
+}
+
+func assertBoard(t testing.TB, got, want board, cursorPosition *position) {
+	t.Helper()
+
+	gotStr := got.String(cursorPosition)
+	wantStr := want.String(nil)
+
+	if gotStr != wantStr {
+		t.Errorf("want board: %v, got: %v", wantStr, gotStr)
+	}
 }
