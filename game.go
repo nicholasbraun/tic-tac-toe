@@ -1,16 +1,7 @@
-package main
+package tictactoe
 
 import (
-	"fmt"
 	"math"
-	"strconv"
-)
-
-type player int
-
-const (
-	Player1 player = iota
-	Player2 player = iota
 )
 
 const emptyField = " "
@@ -31,12 +22,6 @@ var winningPositions = [8][3]position{
 	{position{0, 2}, position{1, 1}, position{2, 0}},
 }
 
-func (p player) String() string {
-	return strconv.Itoa(int(p))
-}
-
-var Symbols map[player]string = map[player]string{Player1: "x", Player2: "o"}
-
 type Stage int
 
 const (
@@ -55,26 +40,37 @@ type Game struct {
 	states        []board
 }
 
-func (g *Game) getStates() string {
-	res := ""
-
-	for _, state := range g.states {
-		res += fmt.Sprintf("%v\n", state.String(nil))
-	}
-
-	return res
+func (g *Game) Start(humanOpponent bool) {
+	g.stage = Playing
+	g.humanOpponent = humanOpponent
 }
 
-func (g *Game) CurrentSymbol() string {
+func (g *Game) GetActiveSymbol() string {
 	return Symbols[g.activePlayer]
 }
 
-func (g *Game) OpponentSymbol() string {
+func (g *Game) getInactiveSymbol() string {
 	if g.activePlayer == Player1 {
 		return Symbols[Player2]
 	}
 
 	return Symbols[Player1]
+}
+
+func (g *Game) GetStage() Stage {
+	return g.stage
+}
+
+func (g *Game) GetWinner() *player {
+	return g.winner
+}
+
+func (g *Game) GetBoard(withCursor bool) string {
+	if withCursor {
+		return g.board.String(g.cursor)
+	}
+
+	return g.board.String(nil)
 }
 
 func NewGame() *Game {
@@ -110,6 +106,19 @@ func (g *Game) MoveCursorUp() {
 	}
 }
 
+func (g *Game) MakeMove() (finished bool, winner *player) {
+	if g.humanOpponent {
+		return g.makeHumanMove()
+	}
+
+	finished, winner = g.makeHumanMove()
+	if finished {
+		return finished, winner
+	}
+
+	return g.makeComputerMove()
+}
+
 func (g *Game) isGameFinished() (isFinished bool, winner *player) {
 	for _, positions := range winningPositions {
 		if g.board.getSymbolFromPosition(positions[0]) == Symbols[g.activePlayer] &&
@@ -127,22 +136,9 @@ func (g *Game) isGameFinished() (isFinished bool, winner *player) {
 }
 
 func (g *Game) makeHumanMove() (finished bool, winner *player) {
-	g.board.markField(*g.cursor, g.CurrentSymbol())
+	g.board.markField(*g.cursor, g.GetActiveSymbol())
 
 	return g.handleMoveDone()
-}
-
-func (g *Game) MakeMove() (finished bool, winner *player) {
-	if g.humanOpponent {
-		return g.makeHumanMove()
-	}
-
-	finished, winner = g.makeHumanMove()
-	if finished {
-		return finished, winner
-	}
-
-	return g.makeComputerMove()
 }
 
 func (g *Game) switchPlayer() {
@@ -225,7 +221,7 @@ func (g *Game) calculateScores() map[string]int {
 		ng.cursor = p
 		ng.activePlayer = g.activePlayer
 
-		finished, _ := ng.makeHumanMove() // switches player if not finished
+		finished, _ := ng.makeHumanMove()
 
 		s := 0
 
@@ -256,20 +252,20 @@ func (g *Game) calculateScores() map[string]int {
 }
 
 func (g *Game) makeComputerMove() (finished bool, winner *player) {
-	currentSymbol := g.CurrentSymbol()
+	currentSymbol := g.GetActiveSymbol()
 
 	if p := g.checkForWinningMove(currentSymbol); p != nil {
 		g.board.markField(*p, currentSymbol)
-	} else if p := g.checkForWinningMove(g.OpponentSymbol()); p != nil {
+	} else if p := g.checkForWinningMove(g.getInactiveSymbol()); p != nil {
 		g.board.markField(*p, currentSymbol)
 	} else {
 		scores := g.calculateScores()
 
 		min := math.MaxInt
 		max := math.MinInt
-
 		maxPos := ""
 		minPos := ""
+
 		for posStr, score := range scores {
 			if score > max {
 				max = score

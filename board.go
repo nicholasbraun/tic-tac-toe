@@ -1,9 +1,7 @@
-package main
+package tictactoe
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 var (
@@ -16,31 +14,6 @@ var (
 	cursorOK    = Green + "H" + Reset
 	cursorError = Red + "H" + Reset
 )
-
-type position struct {
-	row int
-	col int
-}
-
-func (p *position) String() string {
-	return fmt.Sprintf("%d-%d", p.row, p.col)
-}
-
-func stringPosToPosition(posStr string) (*position, error) {
-	spitString := strings.Split(posStr, "-")
-
-	row, err := strconv.Atoi(spitString[0])
-	if err != nil {
-		return nil, err
-	}
-
-	col, err := strconv.Atoi(spitString[1])
-	if err != nil {
-		return nil, err
-	}
-
-	return &position{row, col}, nil
-}
 
 type board [3][3]string
 
@@ -82,19 +55,19 @@ func (b *board) isBoardFull() bool {
 	return true
 }
 
-func (b *board) String(c *position) string {
+func (b *board) String(cursorPosition *position) string {
 	res := ""
 
 	for row, rowData := range b {
 		for col, colData := range rowData {
 			cell := colData
 
-			if c == nil {
+			if cursorPosition == nil {
 				res += fmt.Sprintf("[%s]", cell)
 				continue
 			}
 
-			if c.col == col && c.row == row {
+			if cursorPosition.col == col && cursorPosition.row == row {
 				if cell == " " {
 					cell = cursorOK
 				} else {

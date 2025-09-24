@@ -4,24 +4,25 @@ import (
 	"fmt"
 	"os"
 
+	"example.com/tictactoe"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type model struct {
-	game *Game
+	game *tictactoe.Game
 }
 
 func main() {
 	p := tea.NewProgram(initialModel())
 	if _, err := p.Run(); err != nil {
-		fmt.Printf("Alas, there's been an error: %v", err)
+		fmt.Printf("There's been an error: %v", err)
 		os.Exit(1)
 	}
 }
 
 func initialModel() model {
 	return model{
-		game: NewGame(),
+		game: tictactoe.NewGame(),
 	}
 }
 
@@ -30,12 +31,12 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch m.game.stage {
-	case Setup:
+	switch m.game.GetStage() {
+	case tictactoe.Setup:
 		return updateSetupView(m, msg)
-	case Playing:
+	case tictactoe.Playing:
 		return updatePlayingView(m, msg)
-	case Finished:
+	case tictactoe.Finished:
 		return updateFinishedView(m, msg)
 	}
 
@@ -79,7 +80,7 @@ func updateFinishedView(m model, msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter", "y":
-			m.game = NewGame()
+			m.game = tictactoe.NewGame()
 		}
 	}
 
@@ -95,12 +96,9 @@ func updateSetupView(m model, msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "y", "enter":
-			m.game.humanOpponent = false
-			m.game.stage = Playing
-
+			m.game.Start(false)
 		case "n":
-			m.game.humanOpponent = true
-			m.game.stage = Playing
+			m.game.Start(true)
 		}
 	}
 
@@ -108,31 +106,30 @@ func updateSetupView(m model, msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	switch m.game.stage {
-	case Setup:
+	switch m.game.GetStage() {
+	case tictactoe.Setup:
 		s := "Let's play TicTacToe.\nAre you playing against a computer? [Yn]"
 		return s
 
-	case Playing:
-		s := "It's Player " + m.game.activePlayer.String() + "'s (" + m.game.CurrentSymbol() + ") turn.\n\n"
+	case tictactoe.Playing:
+		s := "It's " + m.game.GetActiveSymbol() + "'s turn.\n\n"
 
-		s += m.game.board.String(m.game.cursor)
+		s += m.game.GetBoard(true)
 
 		s += "\nPress q to quit.\n"
 
 		return s
-	case Finished:
+	case tictactoe.Finished:
 		s := "Game Finished.\n\n"
 
-		s += m.game.board.String(nil)
+		s += m.game.GetBoard(false)
 
-		if m.game.winner != nil {
-			if *m.game.winner == Player1 {
+		if m.game.GetWinner() != nil {
+			if *m.game.GetWinner() == tictactoe.Player1 {
 				s += "\nYou won! "
 			} else {
 				s += "\nYou lost! "
 			}
-			// s += "\nPlayer " + m.game.winner.String() + " has won!\n\n"
 		} else {
 			s += "\nIt's a draw.\n\n"
 		}
