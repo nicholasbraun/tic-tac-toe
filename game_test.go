@@ -264,7 +264,7 @@ func simulateGameRound(t testing.TB, game Game, round int) {
 		isFinished, winner := newGame.MakeMove()
 
 		if isFinished && winner != nil && *winner == Player1 {
-			t.Fatalf("player 1 must not be able to win the game: \n%v", newGame.states)
+			t.Fatalf("player 1 must not be able to win the game: \n%v", newGame.getStates())
 		}
 
 		if !newGame.board.isBoardFull() && newGame.stage != Finished {

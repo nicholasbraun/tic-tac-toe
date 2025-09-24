@@ -1,6 +1,7 @@
 package tictactoe
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -227,30 +228,30 @@ func (g *Game) calculateScores() map[string]int {
 
 		finished, _ := ng.makeHumanMove()
 
-		s := 0
+		score := 0
 
 		// terminal bonus/penalty
 		if finished {
 			if ng.winner == nil {
 				// draw => no adjustment
 			} else if *ng.winner == Player1 {
-				s += 10000
+				score += 10000
 			} else {
-				s -= 10000
+				score -= 10000
 			}
-			scores[p.String()] = s
+			scores[p.String()] = score
 			continue
 		}
 
-		child := ng.calculateScores()
-		if len(child) > 0 {
+		childScores := ng.calculateScores()
+		if len(childScores) > 0 {
 			if ng.activePlayer == Player1 {
-				s += maxVal(child) // P1 will try to maximize
+				score += maxVal(childScores) // P1 will try to maximize
 			} else {
-				s += minVal(child) // P2 will try to minimize
+				score += minVal(childScores) // P2 will try to minimize
 			}
 		}
-		scores[p.String()] = s
+		scores[p.String()] = score
 	}
 	return scores
 }
@@ -298,4 +299,14 @@ func (g *Game) makeComputerMove() (finished bool, winner *player) {
 	}
 
 	return g.handleMoveDone()
+}
+
+func (g *Game) getStates() string {
+	s := ""
+
+	for _, state := range g.states {
+		s += fmt.Sprintf("\n%v\n", state.String(nil))
+	}
+
+	return s
 }
